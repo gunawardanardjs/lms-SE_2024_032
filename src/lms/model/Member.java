@@ -1,6 +1,6 @@
 package lms.model;
 
-public class Member{
+public class Member implements Comparable<Member>{
     private String memberId;
     private String name;
     private int borrowedCount;
@@ -49,7 +49,7 @@ public class Member{
         if(maxBorrowLimit < 0){
             throw new IllegalArgumentException("Max borrowed count cannot be below than 0");
         }else{
-            this.maxBorrowLimit = borrowedCount;
+            this.maxBorrowLimit = maxBorrowLimit;
         }
     }
 
@@ -57,8 +57,20 @@ public class Member{
         return borrowedCount;
     }
 
-    public void incrementBorrowedCount(int borrowedCount){
+    public void incrementBorrowedCount(){
         setBorrowedCount(borrowedCount+1);
+    }
+
+    public void decrementBorrowedCount(){
+        if(borrowedCount <= 0){
+            throw new IllegalStateException("Borrowed count cannot be below 0");
+        }
+        setBorrowedCount(borrowedCount-1);
+    }
+
+    @Override
+    public int compareTo(Member other) {
+        return Integer.compare(other.borrowedCount, this.borrowedCount);
     }
 
     @Override
@@ -67,7 +79,6 @@ public class Member{
                 "memberId='" + memberId + '\'' +
                 ", name='" + name + '\'' +
                 ", borrowedCount=" + borrowedCount +
-                ", maxBorrowLimit=" + maxBorrowLimit +
                 '}';
     }
 }

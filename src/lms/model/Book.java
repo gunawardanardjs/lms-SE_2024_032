@@ -1,14 +1,13 @@
 package lms.model;
 
-public class Book extends LibraryItem {
+public class Book extends LibraryItem implements Reservable{
     private String author;
     private String isbn;
-    private boolean isBorrowed;
+    private Member reservedBy;
 
     public Book(String id, String title, String author, String isbn){
         super(id, title);
         setAuthor(author);
-        setBorrowed(isBorrowed);
         setIsbn(isbn);
     }
 
@@ -52,12 +51,35 @@ public class Book extends LibraryItem {
         }
     }
 
-    public boolean isBorrowed() {
-        return isBorrowed;
+    @Override
+    public double calculateLateFee(int daysLate) {
+        if(daysLate < 0){
+            System.out.println("Overdue days cannot br below than 0");
+            return 0.0;
+        }else{
+            return daysLate*10.0;
+        }
     }
 
-    public void setBorrowed(boolean borrowed) {
-        isBorrowed = borrowed;
+    @Override
+    public void reserve(Member m) {
+        if(reservedBy != null){
+            System.out.println(getTitle() + " is already reserved " + reservedBy.getName());
+        }else{
+            reservedBy = m;
+            System.out.println("\"" + getTitle() + "\" reserved for " + m.getName());
+        }
+    }
+
+    @Override
+    public void cancelReservation() {
+        reservedBy = null;
+        System.out.println("Cancelled reservation for " + getTitle());
+    }
+
+    @Override
+    public boolean isReserved() {
+        return reservedBy != null;
     }
 
     @Override
@@ -66,7 +88,7 @@ public class Book extends LibraryItem {
                 "title='" + getTitle() + '\'' +
                 ", author='" + author + '\'' +
                 ", isbn='" + isbn + '\'' +
-                ", isBorrowed=" + isBorrowed +
+                ", isBorrowed=" + isBorrowed() +
                 '}';
     }
 }
