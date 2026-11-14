@@ -24,6 +24,7 @@ public class Main {
 
         library.printAllLateFees(3);
 
+        System.out.println("-----Loans-----");
         library.lend(b1, m1);
         library.lend(b1, m2);
         library.lend(d1, m2);
@@ -51,7 +52,6 @@ public class Main {
 
         System.out.print("\nFinding a book via ISBM : ");
         System.out.print(library.findBookByIsbn("978-0132350884"))*/
-
 
     }
 }
