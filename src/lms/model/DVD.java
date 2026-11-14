@@ -1,6 +1,6 @@
 package lms.model;
 
-public class DVD extends LibraryItem {
+public class DVD extends LibraryItem{
     private int durationMinutes;
 
     public DVD (String id, String title, int durationMinutes){
@@ -22,6 +22,11 @@ public class DVD extends LibraryItem {
 
     @Override
     public double calculateLateFee(int daysLate) {
-        return daysLate * 25.0;
+        if(daysLate < 0){
+            System.out.println("Overdue days cannot be below than 0");
+            return 0.0;
+        }else{
+            return daysLate * 25.0;
+        }
     }
 }
