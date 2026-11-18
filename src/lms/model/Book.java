@@ -2,13 +2,11 @@ package lms.model;
 
 public class Book extends LibraryItem implements Reservable{
     private String author;
-    private String isbn;
     private Member reservedBy;
 
-    public Book(String id, String title, String author, String isbn){
+    public Book(String id, String title, String author){
         super(id, title);
         setAuthor(author);
-        setIsbn(isbn);
     }
 
     public String getTitle() {
@@ -28,18 +26,6 @@ public class Book extends LibraryItem implements Reservable{
             throw new IllegalArgumentException("Author cannot be empty");
         }else{
             this.author = author;
-        }
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        if(!checkValidate(isbn)){
-            throw new IllegalArgumentException("ISBN cannot be empty");
-        }else{
-            this.isbn = isbn;
         }
     }
 
@@ -87,7 +73,6 @@ public class Book extends LibraryItem implements Reservable{
         return "Book{" +
                 "title='" + getTitle() + '\'' +
                 ", author='" + author + '\'' +
-                ", isbn='" + isbn + '\'' +
                 ", isBorrowed=" + isBorrowed() +
                 '}';
     }

@@ -1,5 +1,7 @@
 package lms;
 
+import lms.exception.ItemNotAvailableException;
+import lms.exception.MemberNotFoundException;
 import lms.model.*;
 import lms.service.Library;
 
@@ -7,51 +9,65 @@ public class Main {
     void main(String[] args) {
         Library library = new Library();
 
-        Book b1 = new Book("B001","Clean Code", "Robert C. Martin", "978-0132350884");
-        DVD d1 = new DVD("D001", "Introduction to Algorithms", 120);
-        Magazine mag1 = new Magazine("M001", "Software Engineering", 10032);
-        library.addItem(b1);
-        library.addItem(d1);
-        library.addItem(mag1);
+        library.addItem(new Book("B001", "Clean Code", "Robert C. Martin"));
+        library.addItem(new DVD("D001", "Introduction to Algorithms", 120));
+        library.addItem(new Magazine("G001", "Software Weekly", 42));
+        library.addMember(new Student("M001", "Nadeesha Perera"));
+        library.addMember(new Staff("M002", "Mr. Kasun Silva"));
 
-        Member m1 = new Student("M001", "Kasun");
-        Member m2 = new Staff("M002", "Mr. Sahan");
-        library.addMember(m1);
-        library.addMember(m2);
+        System.out.println("--- 1. Success ---");
+        attempt(library, "B001", "M001");
 
-        //library.listItems();
-        //library.listmembers();
+        System.out.println("--- 2. Already on loan (checked exception) ---");
+        attempt(library, "B001", "M002");
 
-        library.printAllLateFees(3);
+        System.out.println("--- 3. Unknown member (unchecked exception) ---");
+        attempt(library, "D001", "M999");
 
-        System.out.println("-----Loans-----");
-        library.lend(b1, m1);
-        library.lend(b1, m2);
-        library.lend(d1, m2);
-        library.lend(mag1, m2);
+        System.out.println("--- 4. Unknown item ---");
+        attempt(library, "X404", "M001");
 
-        library.reserveIfPossible(b1, m2);
-        library.reserveIfPossible(d1, m2);
-
-        library.printMembersByActivity();
-
-        //library.streamIfPossible(d1);
-        //library.streamIfPossible(b1);
-
-        /*try{
-            library.addItem(new Book("B003","Clean Code", "", "978-0132350884"));
-        }catch(IllegalArgumentException e){
-            System.out.println("\nRejected Invalid Book : " + e.getMessage());
+        System.out.println("--- 5. Returning something not on loan ---");
+        try {
+            library.returnItem("D001");
+        } catch (ItemNotAvailableException e) {
+            System.out.println("Cannot return: " + e.getMessage());
         }
 
-        try{
-            library.addMember(new Member("M001", "Kasun", -4));
-        }catch(IllegalArgumentException e){
-            System.out.println("Rejected Invalid Member : " + e.getMessage());
+        System.out.println("--- 6. Bad data (IllegalArgumentException) ---");
+        try {
+            new Book("B002", "   ", "Someone");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid book: " + e.getMessage());
         }
 
-        System.out.print("\nFinding a book via ISBM : ");
-        System.out.print(library.findBookByIsbn("978-0132350884"))*/
+        System.out.println("--- 7. Student limit of 3 ---");
+        library.addItem(new Book("B003", "Refactoring", "Martin Fowler"));
+        library.addItem(new Book("B004", "Head First Java", "Kathy Sierra"));
+        library.addItem(new Book("B005", "Effective Java", "Joshua Bloch"));
+        String ids[] = {"D001", "G001", "B003", "B004"};
+        for (String id : ids) {
+            attempt(library, id, "M001");
+        }
 
+        System.out.println("--- 8. Return frees a slot ---");
+        try {
+            library.returnItem("B001");
+            attempt(library, "B004", "M001");
+        } catch (ItemNotAvailableException e) {
+            System.out.println("Unexpected: " + e.getMessage());
+        }
+    }
+
+    private static void attempt(Library library, String itemId, String memberId) {
+        try {
+            library.borrowItem(itemId, memberId);
+        } catch (ItemNotAvailableException e) { //checked
+            System.out.println("Cannot borrow: " + e.getMessage());
+        } catch (MemberNotFoundException e) { //unchecked
+            System.out.println("Unknown member: " + e.getMemberId());
+        } finally {
+            System.out.println("   (attempt finished: item " + itemId + ", member " + memberId + ")");
+        }
     }
 }

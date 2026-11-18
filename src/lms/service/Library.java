@@ -1,5 +1,7 @@
 package lms.service;
 
+import lms.exception.ItemNotAvailableException;
+import lms.exception.MemberNotFoundException;
 import lms.model.*;
 
 import java.util.ArrayList;
@@ -38,13 +40,6 @@ public class Library{
         members.add(member);
     }
 
-    /*public void listBooks(){
-        System.out.println("\n-----Books-----");
-        for(Book b : books){
-            System.out.println(b);
-        }
-    }*/
-
     public void listItems(){
         System.out.println("\n-----Items in the Library-----");
         for(LibraryItem item : items){
@@ -66,20 +61,20 @@ public class Library{
     public List<Member> getMembers(){
         return members;
     }
-
-    public Book findBookByIsbn(String isbn) {
-        for (LibraryItem item : items) {
-            if (item instanceof Book) {
-                Book book = (Book) item;
-                if (isbn != null && isbn.equals(book.getIsbn())) {
-                    System.out.println("Book found");
-                    return book;
-                }
-            }
-        }
-        System.out.println("Book Not Found");
-        return null;
-    }
+//
+//    public Book findBookByIsbn(String isbn) {
+//        for (LibraryItem item : items) {
+//            if (item instanceof Book) {
+//                Book book = (Book) item;
+//                if (isbn != null && isbn.equals(book.getIsbn())) {
+//                    System.out.println("Book found");
+//                    return book;
+//                }
+//            }
+//        }
+//        System.out.println("Book Not Found");
+//        return null;
+//    }
 
     public void printAllLateFees(int daysLate) {
         System.out.println("\n-----Late fees if " + daysLate + " days late-----");
@@ -90,7 +85,7 @@ public class Library{
         System.out.println();
     }
 
-    public void lend(Loanable thing, Member member){
+    public void lend(Loanable thing, Member member) throws ItemNotAvailableException {
         thing.loan(member);
     }
 
@@ -109,6 +104,34 @@ public class Library{
         for(Member m : sorted){
             System.out.println(m.getName() + " (" + m.getBorrowedCount() + " borrowed)");
         }
+    }
+
+    public Member findMember(String memberId){
+        for(Member member : members){
+            if(member.getMemberId() == memberId){
+                return member;
+            }
+        }
+        throw new MemberNotFoundException(memberId + " Not Found");
+    }
+
+    public LibraryItem findItem(String itemId) throws ItemNotAvailableException{
+        for(LibraryItem item : items){
+            if(item.getId() == itemId){
+                return item;
+            }
+        }
+        throw new ItemNotAvailableException(itemId + " not found");
+    }
+
+    public void borrowItem(String itemId, String memberId) throws ItemNotAvailableException{
+        LibraryItem item = findItem(itemId);
+        Member m = findMember(memberId);
+        item.loan(m);
+    }
+
+    public void returnItem(String itemId) throws ItemNotAvailableException{
+        findItem(itemId).returnItem();
     }
 
 }
