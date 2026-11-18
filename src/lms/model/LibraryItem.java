@@ -1,15 +1,26 @@
 package lms.model;
 
+import lms.exception.ItemNotAvailableException;
+import lms.exception.MemberNotFoundException;
+
 public abstract class LibraryItem implements Loanable{
     private String id;
     private String title;
     private boolean isBorrowed;
-    private Member borrowedBy;
+    private Member borrower;
 
     public LibraryItem(String id, String title){
         setId(id);
         setTitle(title);
         this.isBorrowed = false;
+    }
+
+    public boolean validateText(String text){
+        if(text == null || text.isBlank()){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     public String getId() {
@@ -28,14 +39,6 @@ public abstract class LibraryItem implements Loanable{
         return title;
     }
 
-    public boolean validateText(String text){
-        if(text == null || text.isBlank()){
-            return false;
-        }else{
-            return true;
-        }
-    }
-
     public void setTitle(String title) {
         if(!validateText(title)){
             throw new IllegalArgumentException("Title cannot be empty");
@@ -52,31 +55,34 @@ public abstract class LibraryItem implements Loanable{
         isBorrowed = true;
     }
 
+    public Member getBorrower(){
+       return borrower;
+    }
+
     public abstract double calculateLateFee(int daysLate);
 
     @Override
-    public void loan(Member member) {
+    public void loan(Member member) throws ItemNotAvailableException {
         if(isBorrowed){
-            System.out.println(title + " is already on loan.");
+            throw new ItemNotAvailableException(getTitle() + " is already on loan");
         }else if(member.getBorrowedCount() >= member.getMaxBorrowLimit()){
-            System.out.println("\"" + member.getName() + "\" has reached the maximum limit");
+            throw new MemberNotFoundException(member.getName() + " has reached the limit of " + member.getMaxBorrowLimit() + " items");
         }else{
             isBorrowed = true;
-            borrowedBy = member;
+            borrower = member;
             member.incrementBorrowedCount();
             System.out.println("\"" + getTitle() + "\" loaned to " + member.getName());
         }
     }
 
     @Override
-    public void returnItem() {
+    public void returnItem() throws ItemNotAvailableException {
         if(!isBorrowed){
-            System.out.println("Cannot return \"" + getTitle() + "\": it is not currently on loan.");
-            return;
+            throw new ItemNotAvailableException(getTitle() + " is not on loan");
         }
         isBorrowed = false;
-        borrowedBy.decrementBorrowedCount();
-        borrowedBy = null;
+        borrower.decrementBorrowedCount();
+        borrower = null;
         System.out.println("\"" + getTitle() + "\" returned");
     }
 
